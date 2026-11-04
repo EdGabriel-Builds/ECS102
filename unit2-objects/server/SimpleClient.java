@@ -15,7 +15,6 @@ public class SimpleClient {
 
     public void sendMessage(String msg) {
         out.println(msg);
-        out.flush();
     }
 
     public String receiveMessage() {
@@ -26,9 +25,9 @@ public class SimpleClient {
     }
 
     public void close() throws Exception {
-        out.close();
-        in.close();
-        socket.close();
+        if (out != null) out.close();
+        if (in != null) in.close();
+        if (socket != null) socket.close();
     }
 
     public static void main(String[] args) throws Exception {
@@ -39,7 +38,7 @@ public class SimpleClient {
         while (true) {
             String message = input.nextLine();
             smc.sendMessage(message);
-            
+
             String response = smc.receiveMessage();
             System.out.println("Server: " + response);
 

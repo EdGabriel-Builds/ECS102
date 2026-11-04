@@ -1,8 +1,8 @@
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Scanner;
 
 public class SimpleServer {
     private ServerSocket serverSocket;
@@ -10,48 +10,56 @@ public class SimpleServer {
     private PrintWriter out;
     private Scanner in;
 
-    public SimpleServer(int port) throws Exception{
+    public SimpleServer(int port) throws Exception {
         serverSocket = new ServerSocket(port);
-
     }
+
     public void acceptClient() throws Exception {
         socket = serverSocket.accept();
         in = new Scanner(socket.getInputStream());
-        out = new PrintWriter(socket.getOutputStream());
+        out = new PrintWriter(socket.getOutputStream(), true);
     }
-    public String receiveMessage(){
-        return in.nextLine();
 
+    public String receiveMessage() {
+        if (in.hasNextLine()) {
+            return in.nextLine();
+        }
+        return null;
     }
-    public void sendMessage(String msg){
+
+    public void sendMessage(String msg) {
         out.println(msg);
     }
-    public void close() throws Exception{
-        serverSocket.close();
-        socket.close();
-        in.close();
-        out.close();
+
+    public void close() throws Exception {
+        if (out != null) out.close();
+        if (in != null) in.close();
+        if (socket != null) socket.close();
+        if (serverSocket != null) serverSocket.close();
     }
-    public static void main(String[] args) throws Exception{
+
+    public static void main(String[] args) throws Exception {
         SimpleServer smp = new SimpleServer(9090);
         smp.acceptClient();
-        Scanner input=new Scanner(System.in);
-        while(true){
-            String message=input.nextLine();
-            smp.sendMessage(message);
-           // smp.sendMessage("hello");
-            String msg=smp.receiveMessage();
-            System.out.print("Client  "+msg);
-            if(msg.equals("stop")){
-                 break;
+        
+        Scanner serverInput = new Scanner(System.in);
+
+        while (true) {
+            String msg = smp.receiveMessage();
+            if (msg == null || msg.equals("stop")) {
+                break;
             }
+            System.out.println("Client: " + msg);
 
+            System.out.print("Server reply: ");
+            String reply = serverInput.nextLine();
+
+            smp.sendMessage(reply);
         }
+
+        serverInput.close();
         smp.close();
-
     }
-
-    
 }
 
 // // package Server;
